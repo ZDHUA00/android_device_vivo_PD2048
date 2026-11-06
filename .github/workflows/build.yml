@@ -67,7 +67,7 @@ jobs:
           removed = 0
           for p in list(r.findall('project')):
               path = p.get('path') or p.get('name') or ''
-              if (path.startswith('device/') or path.startswith('vendor/') or path.startswith('kernel/')) and not any(path == k or path.startswith(k + '/') for k in keep):
+              if (path.startswith('device/') or path.startswith('vendor/') or path.startswith('kernel/') or path.startswith('hardware/qcom')) and not any(path == k or path.startswith(k + '/') for k in keep):
                   r.remove(p); removed += 1
           t.write('.repo/manifests/default.xml', encoding='utf-8', xml_declaration=True)
           print('removed projects:', removed)
