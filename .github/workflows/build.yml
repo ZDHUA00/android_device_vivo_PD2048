@@ -1,0 +1,74 @@
+name: Build LineageOS 20 for PD2048
+
+on:
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 350
+    steps:
+      - name: Maximize build space
+        uses: easimon/maximize-build-space@master
+        with:
+          root-reserve-mb: 4096
+          swap-size-mb: 4096
+          remove-dotnet: 'true'
+          remove-android: 'true'
+          remove-haskell: 'true'
+          remove-codeql: 'true'
+
+      - name: Install dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y bc bison build-essential ccache curl flex g++-multilib \
+            gcc-multilib git git-lfs gnupg gperf imagemagick lib32ncurses5-dev \
+            lib32readline-dev lib32z1-dev liblz4-tool libncurses5 libncurses5-dev \
+            libsdl1.2-dev libssl-dev libxml2 libxml2-utils lzop pngcrush rsync \
+            schedtool squashfs-tools xsltproc zip zlib1g-dev python3 python3-pip \
+            openjdk-11-jdk
+
+      - name: Install repo
+        run: |
+          mkdir -p ~/bin
+          curl -s https://storage.googleapis.com/git-repo-downloads/repo > ~/bin/repo
+          chmod a+x ~/bin/repo
+          echo "$HOME/bin" >> $GITHUB_PATH
+
+      - name: Configure git
+        run: |
+          git config --global user.name "ZDHUA00"
+          git config --global user.email "133396238+ZDHUA00@users.noreply.github.com"
+          git lfs install
+
+      - name: Sync LineageOS 20
+        run: |
+          mkdir -p ~/android/lineage
+          cd ~/android/lineage
+          repo init -u https://github.com/LineageOS/android.git -b lineage-20 --depth=1
+          mkdir -p .repo/local_manifests
+          cat > .repo/local_manifests/pd2048.xml <<'EOF'
+          <?xml version="1.0" encoding="UTF-8"?>
+          <manifest>
+            <project name="ZDHUA00/android_device_vivo_PD2048" path="device/vivo/PD2048" remote="github" />
+            <project name="ZDHUA00/android_vendor_vivo_PD2048" path="vendor/vivo/PD2048" remote="github" />
+          </manifest>
+          EOF
+          repo sync -c --force-sync --no-clone-bundle --no-tags -j$(nproc)
+
+      - name: Build systemimage
+        run: |
+          cd ~/android/lineage
+          source build/envsetup.sh
+          lunch lineage_PD2048-userdebug
+          mka systemimage -j$(nproc)
+
+      - name: Upload system image
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: PD2048-systemimage
+          path: |
+            ~/android/lineage/out/target/product/PD2048/system.img
+            ~/android/lineage/out/target/product/PD2048/*.img
+          if-no-files-found: warn

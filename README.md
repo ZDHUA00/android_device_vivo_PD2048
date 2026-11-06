@@ -1,2 +1,8 @@
-# android_device_vivo_PD2048
-LineageOS device tree for vivo PD2048 (S9e, MT6875)
+# Android device tree for vivo V2048A (PD2048)
+
+```
+#
+# SPDX-FileCopyrightText: The LineageOS Project
+# SPDX-License-Identifier: Apache-2.0
+#
+```
