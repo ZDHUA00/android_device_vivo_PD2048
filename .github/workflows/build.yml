@@ -51,7 +51,7 @@ jobs:
           df -h | tee "$GITHUB_WORKSPACE/sync.log"
           mkdir -p "$GITHUB_WORKSPACE/lineage"
           cd "$GITHUB_WORKSPACE/lineage"
-          repo init -u https://github.com/LineageOS/android.git -b lineage-20.0 --depth=1 --partial-clone --clone-filter=blob:none 2>&1 | tee -a "$GITHUB_WORKSPACE/sync.log"
+          repo init -u https://github.com/LineageOS/android.git -b lineage-20.0 --depth=1 2>&1 | tee -a "$GITHUB_WORKSPACE/sync.log"
           mkdir -p .repo/local_manifests
           cat > .repo/local_manifests/pd2048.xml <<'EOF'
           <?xml version="1.0" encoding="UTF-8"?>
@@ -60,7 +60,20 @@ jobs:
             <project name="ZDHUA00/android_vendor_vivo_PD2048" path="vendor/vivo/PD2048" remote="github" />
           </manifest>
           EOF
-          repo sync -c --force-sync --no-clone-bundle --no-tags -j$(nproc) 2>&1 | tee -a "$GITHUB_WORKSPACE/sync.log"
+          repo manifest -o /tmp/full.xml
+          python3 - <<'PY'
+          import xml.etree.ElementTree as ET
+          t = ET.parse('/tmp/full.xml'); r = t.getroot()
+          keep = ('device/vivo/PD2048', 'device/lineage', 'device/generic', 'vendor/vivo/PD2048', 'vendor/lineage')
+          removed = 0
+          for p in list(r.findall('project')):
+              path = p.get('path') or p.get('name') or ''
+              if (path.startswith('device/') or path.startswith('vendor/') or path.startswith('kernel/')) and not any(path == k or path.startswith(k + '/') for k in keep):
+                  r.remove(p); removed += 1
+          t.write('.repo/manifests/default.xml', encoding='utf-8', xml_declaration=True)
+          print('removed projects:', removed)
+          PY
+          repo sync --no-manifest-update -c --force-sync --no-clone-bundle --no-tags -j$(nproc) 2>&1 | tee -a "$GITHUB_WORKSPACE/sync.log"
           df -h | tee -a "$GITHUB_WORKSPACE/sync.log"
 
       - name: Build systemimage
