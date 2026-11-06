@@ -49,7 +49,7 @@ jobs:
           df -h | tee "$GITHUB_WORKSPACE/sync.log"
           mkdir -p "$GITHUB_WORKSPACE/lineage"
           cd "$GITHUB_WORKSPACE/lineage"
-          repo init -u https://github.com/LineageOS/android.git -b lineage-20 --depth=1 2>&1 | tee -a "$GITHUB_WORKSPACE/sync.log"
+          repo init -u https://github.com/LineageOS/android.git -b lineage-20.0 --depth=1 2>&1 | tee -a "$GITHUB_WORKSPACE/sync.log"
           mkdir -p .repo/local_manifests
           cat > .repo/local_manifests/pd2048.xml <<'EOF'
           <?xml version="1.0" encoding="UTF-8"?>
