@@ -3,6 +3,10 @@ name: Build LineageOS 20 for PD2048
 on:
   workflow_dispatch:
 
+permissions:
+  contents: read
+  issues: write
+
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -43,10 +47,11 @@ jobs:
 
       - name: Sync LineageOS 20
         run: |
-          df -h
+          set -o pipefail
+          df -h | tee "$GITHUB_WORKSPACE/sync.log"
           mkdir -p "$GITHUB_WORKSPACE/lineage"
           cd "$GITHUB_WORKSPACE/lineage"
-          repo init -u https://github.com/LineageOS/android.git -b lineage-20 --depth=1
+          repo init -u https://github.com/LineageOS/android.git -b lineage-20 --depth=1 2>&1 | tee -a "$GITHUB_WORKSPACE/sync.log"
           mkdir -p .repo/local_manifests
           cat > .repo/local_manifests/pd2048.xml <<'EOF'
           <?xml version="1.0" encoding="UTF-8"?>
@@ -55,16 +60,16 @@ jobs:
             <project name="ZDHUA00/android_vendor_vivo_PD2048" path="vendor/vivo/PD2048" remote="github" />
           </manifest>
           EOF
-          repo sync -c --force-sync --no-clone-bundle --no-tags -j$(nproc)
-          df -h
+          repo sync -c --force-sync --no-clone-bundle --no-tags -j$(nproc) 2>&1 | tee -a "$GITHUB_WORKSPACE/sync.log"
+          df -h | tee -a "$GITHUB_WORKSPACE/sync.log"
 
       - name: Build systemimage
         run: |
-          df -h
+          set -o pipefail
           cd "$GITHUB_WORKSPACE/lineage"
-          source build/envsetup.sh
-          lunch lineage_PD2048-userdebug
-          mka systemimage -j$(nproc)
+          source build/envsetup.sh 2>&1 | tee "$GITHUB_WORKSPACE/build.log"
+          lunch lineage_PD2048-userdebug 2>&1 | tee -a "$GITHUB_WORKSPACE/build.log"
+          mka systemimage -j$(nproc) 2>&1 | tee -a "$GITHUB_WORKSPACE/build.log"
 
       - name: Upload system image
         if: always()
@@ -75,3 +80,34 @@ jobs:
             ${{ github.workspace }}/lineage/out/target/product/PD2048/system.img
             ${{ github.workspace }}/lineage/out/target/product/PD2048/*.img
           if-no-files-found: warn
+
+      - name: Report failure log to issue
+        if: failure()
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          REPO: ${{ github.repository }}
+        run: |
+          python3 - <<'PY'
+          import json, os, urllib.request
+          logs = []
+          for name in ("sync.log", "build.log"):
+              p = os.path.join(os.environ["GITHUB_WORKSPACE"], name)
+              if os.path.isfile(p):
+                  data = open(p, errors="replace").read()
+                  logs.append("===== %s (tail) =====\n%s" % (name, data[-20000:]))
+          body = json.dumps({
+              "title": "CI failure log (run %s)" % os.environ.get("GITHUB_RUN_NUMBER", "?"),
+              "body": "```\n" + "\n".join(logs)[-55000:] + "\n```",
+          }).encode()
+          req = urllib.request.Request(
+              "https://api.github.com/repos/%s/issues" % os.environ["REPO"],
+              data=body, method="POST")
+          req.add_header("Authorization", "Bearer " + os.environ["GH_TOKEN"])
+          req.add_header("Accept", "application/vnd.github+json")
+          req.add_header("User-Agent", "zcode-ci")
+          try:
+              with urllib.request.urlopen(req, timeout=60) as r:
+                  print("issue created", r.status)
+          except Exception as e:
+              print("issue create failed", e)
+          PY
