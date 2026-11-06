@@ -55,8 +55,8 @@ jobs:
           cat > .repo/local_manifests/pd2048.xml <<'EOF'
           <?xml version="1.0" encoding="UTF-8"?>
           <manifest>
-            <project name="ZDHUA00/android_device_vivo_PD2048" path="device/vivo/PD2048" remote="github" />
-            <project name="ZDHUA00/android_vendor_vivo_PD2048" path="vendor/vivo/PD2048" remote="github" />
+            <project name="ZDHUA00/android_device_vivo_PD2048" path="device/vivo/PD2048" remote="github" revision="main" />
+            <project name="ZDHUA00/android_vendor_vivo_PD2048" path="vendor/vivo/PD2048" remote="github" revision="main" />
           </manifest>
           EOF
           repo manifest -o /tmp/full.xml
