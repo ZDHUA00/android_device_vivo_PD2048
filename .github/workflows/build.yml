@@ -43,8 +43,9 @@ jobs:
 
       - name: Sync LineageOS 20
         run: |
-          mkdir -p ~/android/lineage
-          cd ~/android/lineage
+          df -h
+          mkdir -p "$GITHUB_WORKSPACE/lineage"
+          cd "$GITHUB_WORKSPACE/lineage"
           repo init -u https://github.com/LineageOS/android.git -b lineage-20 --depth=1
           mkdir -p .repo/local_manifests
           cat > .repo/local_manifests/pd2048.xml <<'EOF'
@@ -55,10 +56,12 @@ jobs:
           </manifest>
           EOF
           repo sync -c --force-sync --no-clone-bundle --no-tags -j$(nproc)
+          df -h
 
       - name: Build systemimage
         run: |
-          cd ~/android/lineage
+          df -h
+          cd "$GITHUB_WORKSPACE/lineage"
           source build/envsetup.sh
           lunch lineage_PD2048-userdebug
           mka systemimage -j$(nproc)
@@ -69,6 +72,6 @@ jobs:
         with:
           name: PD2048-systemimage
           path: |
-            ~/android/lineage/out/target/product/PD2048/system.img
-            ~/android/lineage/out/target/product/PD2048/*.img
+            ${{ github.workspace }}/lineage/out/target/product/PD2048/system.img
+            ${{ github.workspace }}/lineage/out/target/product/PD2048/*.img
           if-no-files-found: warn
