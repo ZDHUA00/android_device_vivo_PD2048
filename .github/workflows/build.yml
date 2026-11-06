@@ -72,6 +72,7 @@ jobs:
           t.write('.repo/manifests/default.xml', encoding='utf-8', xml_declaration=True)
           print('removed projects:', removed)
           PY
+          rm -rf .repo/local_manifests
           repo sync --no-manifest-update -c --force-sync --no-clone-bundle --no-tags -j$(nproc) 2>&1 | tee -a "$GITHUB_WORKSPACE/sync.log"
           df -h | tee -a "$GITHUB_WORKSPACE/sync.log"
 
