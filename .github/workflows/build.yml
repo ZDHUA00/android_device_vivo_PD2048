@@ -80,12 +80,13 @@ jobs:
         run: |
           set -o pipefail
           cd "$GITHUB_WORKSPACE/lineage"
+          exec >> "$GITHUB_WORKSPACE/build.log" 2>&1
           du -sh .repo || true
           rm -rf .repo
           df -h
           source build/envsetup.sh
           lunch lineage_PD2048-userdebug
-          mka systemimage -j$(nproc) 2>&1 | tee "$GITHUB_WORKSPACE/build.log"
+          mka systemimage -j$(nproc)
 
       - name: Upload system image
         if: always()
