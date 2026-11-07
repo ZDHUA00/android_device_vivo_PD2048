@@ -16,7 +16,7 @@ jobs:
         uses: easimon/maximize-build-space@master
         with:
           root-reserve-mb: 4096
-          swap-size-mb: 4096
+          swap-size-mb: 8192
           remove-dotnet: 'true'
           remove-android: 'true'
           remove-haskell: 'true'
@@ -82,6 +82,9 @@ jobs:
           df -h | tee -a "$GITHUB_WORKSPACE/sync.log"
 
       - name: Build systemimage
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          REPO: ${{ github.repository }}
         run: |
           set -o pipefail
           cd "$GITHUB_WORKSPACE/lineage"
@@ -109,6 +112,17 @@ jobs:
           lunch lineage_PD2048-userdebug
           free -h
           df -h
+          (
+            while true; do
+              sleep 240
+              L=$(tail -n 1 "$GITHUB_WORKSPACE/build.log" 2>/dev/null | cut -c1-150)
+              M=$(free -m | awk '/Mem:/{print $3"/"$2"MB"}')
+              S=$(free -m | awk '/Swap:/{print $3"MB"}')
+              D=$(df -m . | awk 'NR==2{print $4"MB free"}')
+              BODY="log: $L | mem: $M | swap: $S | disk: $D"
+              BODY="$BODY" python3 -c "import json,os,urllib.request; b=json.dumps({'body':os.environ['BODY']}).encode(); r=urllib.request.Request('https://api.github.com/repos/%s/issues/37/comments' % os.environ['REPO'], data=b, method='POST'); r.add_header('Authorization','Bearer '+os.environ['GH_TOKEN']); r.add_header('User-Agent','zcode-ci'); r.add_header('Content-Type','application/json'); urllib.request.urlopen(r, timeout=30)" || true
+            done
+          ) &
           mka systemimage -j2
 
       - name: Upload system image
