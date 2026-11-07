@@ -73,3 +73,6 @@ PRODUCT_SOONG_NAMESPACES += \
 
 # Inherit the proprietary files
 $(call inherit-product, vendor/vivo/PD2048/PD2048-vendor.mk)
+
+# Keep out/ small enough for the CI build volume
+PRODUCT_MINIMIZE_JAVA_DEBUG_INFO := true
