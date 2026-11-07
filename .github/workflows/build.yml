@@ -63,7 +63,7 @@ jobs:
           python3 - <<'PY'
           import xml.etree.ElementTree as ET
           t = ET.parse('/tmp/full.xml'); r = t.getroot()
-          keep = ('device/vivo/PD2048', 'device/lineage', 'device/generic', 'vendor/vivo/PD2048', 'vendor/lineage', 'kernel/configs')
+          keep = ('device/vivo/PD2048', 'device/lineage', 'device/generic', 'device/google/cuttlefish', 'vendor/vivo/PD2048', 'vendor/lineage', 'kernel/configs')
           removed = 0
           for p in list(r.findall('project')):
               path = p.get('path') or p.get('name') or ''
