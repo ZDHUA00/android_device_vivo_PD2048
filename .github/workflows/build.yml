@@ -82,10 +82,12 @@ jobs:
           cd "$GITHUB_WORKSPACE/lineage"
           exec >> "$GITHUB_WORKSPACE/build.log" 2>&1
           du -sh .repo || true
+          { echo "repo size: $(du -sh .repo 2>/dev/null | cut -f1)"; df -h; } | tee "$GITHUB_WORKSPACE/diag.txt"
           rm -rf .repo
           for d in cts test platform_testing developers sdk prebuilts/qemu-kernel tools/test tools/tradefederation art/test; do
-            if [ -d "$d" ]; then find "$d" -type f ! -name '*.bp' ! -name '*.mk' ! -name '*.go' -delete; fi
+            if [ -d "$d" ]; then find "$d" -type f ! -name '*.bp' ! -name '*.mk' ! -name '*.go' ! -name '*.aidl' ! -name '*.proto' ! -name '*.rs' -delete; fi
           done
+          find . -type d -name tests -prune -print0 2>/dev/null | while IFS= read -r -d '' t; do find "$t" -type f ! -name '*.bp' ! -name '*.mk' ! -name '*.go' ! -name '*.aidl' ! -name '*.proto' ! -name '*.rs' -delete; done
           df -h
           mkdir -p packages/modules/Virtualization/kernel/prebuilts
           cd packages/modules/Virtualization/kernel/prebuilts
@@ -124,15 +126,20 @@ jobs:
         run: |
           python3 - <<'PY'
           import json, os, urllib.request
+          diag = ""
+          p = os.path.join(os.environ["GITHUB_WORKSPACE"], "diag.txt")
+          if os.path.isfile(p):
+              diag = open(p, errors="replace").read()[:4000]
           logs = []
           for name in ("sync.log", "build.log"):
               p = os.path.join(os.environ["GITHUB_WORKSPACE"], name)
               if os.path.isfile(p):
                   data = open(p, errors="replace").read()
                   logs.append("===== %s (tail) =====\n%s" % (name, data[-20000:]))
+          NL = chr(10)
           body = json.dumps({
               "title": "CI failure log (run %s)" % os.environ.get("GITHUB_RUN_NUMBER", "?"),
-              "body": "```\n" + "\n".join(logs)[-55000:] + "\n```",
+              "body": "```" + NL + NL.join(logs)[-45000:] + NL + "```" + NL + "```" + NL + diag + NL + "```",
           }).encode()
           req = urllib.request.Request(
               "https://api.github.com/repos/%s/issues" % os.environ["REPO"],
