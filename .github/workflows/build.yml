@@ -97,8 +97,8 @@ jobs:
           source build/envsetup.sh
           lunch lineage_PD2048-userdebug
           free -h
-df -h
-mka systemimage -j2
+          df -h
+          mka systemimage -j2
 
       - name: Upload system image
         if: always()
