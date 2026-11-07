@@ -85,12 +85,14 @@ jobs:
           rm -rf .repo
           mkdir -p packages/modules/Virtualization/kernel/prebuilts
           cd packages/modules/Virtualization/kernel/prebuilts
-          touch dummy_kernel dummy_modules
+          touch dummy_kernel dummy_modules dummy_bootloader dummy_key
           cat > Android.bp <<'EOF'
           filegroup { name: "kernel_prebuilts-5.10-arm64", srcs: ["dummy_kernel"] }
           filegroup { name: "kernel_prebuilts-5.10-x86_64", srcs: ["dummy_kernel"] }
           filegroup { name: "virt_device_prebuilts_kernel_modules_microdroid-5.10-arm64", srcs: ["dummy_modules"] }
           filegroup { name: "virt_device_prebuilts_kernel_modules_microdroid-5.10-x86_64", srcs: ["dummy_modules"] }
+          filegroup { name: "microdroid_crosvm_bootloader", srcs: ["dummy_bootloader"] }
+          filegroup { name: "microdroid_crosvm_bootloader.avbpubkey", srcs: ["dummy_key"] }
           EOF
           cd "$GITHUB_WORKSPACE/lineage"
           df -h
