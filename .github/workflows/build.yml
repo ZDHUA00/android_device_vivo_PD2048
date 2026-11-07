@@ -69,12 +69,9 @@ jobs:
               path = p.get('path') or p.get('name') or ''
               if (path.startswith('device/') or path.startswith('vendor/') or path.startswith('kernel/') or path.startswith('hardware/qcom')) and not any(path == k or path.startswith(k + '/') for k in keep):
                   r.remove(p); removed += 1
-          drop = ('cts', 'test', 'platform_testing', 'sdk', 'developers', 'tools/tradefederation', 'tools/test', 'tools/asuite', 'pdk', 'prebuilts/qemu-kernel', 'external/robolectric')
-          test_keep = ('test/app_compat/csuite',)
+          drop = ('prebuilts/gcc', 'prebuilts/abi-dumps', 'prebuilts/devtools', 'prebuilts/gradle-plugin', 'prebuilts/cmdline-tools', 'prebuilts/qemu-kernel')
           for p in list(r.findall('project')):
               path = p.get('path') or p.get('name') or ''
-              if any(path == k or path.startswith(k + '/') for k in test_keep):
-                  continue
               if any(path == d or path.startswith(d + '/') for d in drop):
                   r.remove(p); removed += 1
           t.write('.repo/manifests/default.xml', encoding='utf-8', xml_declaration=True)
@@ -93,6 +90,9 @@ jobs:
           { echo "repo size: $(du -sh .repo 2>/dev/null | cut -f1)"; df -h; } | tee "$GITHUB_WORKSPACE/diag.txt"
           rm -rf .repo
           du -sh --exclude=.repo ./* 2>/dev/null | sort -h | tail -25 | tee -a "$GITHUB_WORKSPACE/diag.txt"
+          DEF=$(grep -rhoE 'clang-r[0-9a-zA-Z]+' build/soong/cc/config/global.go | head -1)
+          echo "default clang: $DEF" | tee -a "$GITHUB_WORKSPACE/diag.txt"
+          ls -d prebuilts/clang/host/linux-x86/clang-* 2>/dev/null | grep -v -E "(${DEF}|clang-3289846)$" | xargs -r rm -rf
           df -h | tee -a "$GITHUB_WORKSPACE/diag.txt"
           mkdir -p packages/modules/Virtualization/kernel/prebuilts
           cd packages/modules/Virtualization/kernel/prebuilts
