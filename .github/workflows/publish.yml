@@ -1,0 +1,66 @@
+name: Publish system image
+
+on:
+  workflow_dispatch:
+    inputs:
+      run_id:
+        description: Build run id
+        required: true
+
+permissions:
+  contents: write
+  actions: read
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Download build artifact
+        uses: dawidd6/action-download-artifact@v6
+        with:
+          run_id: ${{ inputs.run_id }}
+          name: PD2048-systemimage
+          path: out
+
+      - name: List
+        run: ls -lh out
+
+      - name: Publish to release
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          REPO: ${{ github.repository }}
+          RUN_ID: ${{ inputs.run_id }}
+        run: |
+          cd out
+          IMG=$(find . -name "system.img" | head -1)
+          echo "IMG=$IMG"
+          split -b 1800M -d "$IMG" system.img.part.
+          ls -lh
+          python3 - <<'PY'
+          import glob, json, os, urllib.request
+          token = os.environ["GH_TOKEN"]
+          repo = os.environ["REPO"]
+          tag = "build-" + os.environ["RUN_ID"]
+          def req(url, data=None, method="GET", ctype=None):
+              r = urllib.request.Request(url, data=data, method=method)
+              r.add_header("Authorization", "Bearer " + token)
+              r.add_header("User-Agent", "zcode-ci")
+              if ctype:
+                  r.add_header("Content-Type", ctype)
+              return r
+          try:
+              rel = json.loads(urllib.request.urlopen(
+                  req(f"https://api.github.com/repos/{repo}/releases/tags/{tag}"), timeout=60).read())
+          except Exception:
+              body = json.dumps({"tag_name": tag, "name": tag, "prerelease": True}).encode()
+              rel = json.loads(urllib.request.urlopen(
+                  req(f"https://api.github.com/repos/{repo}/releases", body, "POST", "application/json"),
+                  timeout=60).read())
+          print("release", rel["id"])
+          for f in sorted(glob.glob("system.img.part.*")):
+              name = os.path.basename(f)
+              data = open(f, "rb").read()
+              url = rel["upload_url"].split("{")[0] + "?name=" + name
+              r = req(url, data, "POST", "application/octet-stream")
+              print(name, len(data), urllib.request.urlopen(r, timeout=900).status)
+          PY
