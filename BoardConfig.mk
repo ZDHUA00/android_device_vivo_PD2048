@@ -92,3 +92,7 @@ DEVICE_MANIFEST_FILE += $(DEVICE_PATH)/manifest.xml
 
 # Inherit the proprietary files
 include vendor/vivo/PD2048/BoardConfigVendor.mk
+
+# Skip dexpreopt: keeps out/ small enough for the CI build volume and avoids
+# the memory-heavy dex2oat stage. Apps are dexopt'ed on first boot instead.
+WITH_DEXPREOPT := false
