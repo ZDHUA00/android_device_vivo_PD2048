@@ -85,10 +85,10 @@ jobs:
           { echo "repo size: $(du -sh .repo 2>/dev/null | cut -f1)"; df -h; } | tee "$GITHUB_WORKSPACE/diag.txt"
           rm -rf .repo
           for d in cts test platform_testing developers sdk prebuilts/qemu-kernel tools/test tools/tradefederation art/test; do
-            if [ -d "$d" ]; then find "$d" -type f ! -name '*.bp' ! -name '*.mk' ! -name '*.go' ! -name '*.aidl' ! -name '*.proto' ! -name '*.rs' -delete; fi
+            if [ -d "$d" ]; then find "$d" -type f \( -name '*.java' -o -name '*.kt' -o -name '*.c' -o -name '*.cc' -o -name '*.cpp' -o -name '*.h' -o -name '*.hpp' -o -name '*.S' -o -name '*.s' -o -name '*.py' \) -delete; fi
           done
-          find . -type d -name tests -prune -print0 2>/dev/null | while IFS= read -r -d '' t; do find "$t" -type f ! -name '*.bp' ! -name '*.mk' ! -name '*.go' ! -name '*.aidl' ! -name '*.proto' ! -name '*.rs' -delete; done
-          df -h
+          find . -type d \( -name tests -o -name test \) -prune -print0 2>/dev/null | while IFS= read -r -d '' t; do find "$t" -type f \( -name '*.java' -o -name '*.kt' -o -name '*.c' -o -name '*.cc' -o -name '*.cpp' -o -name '*.h' -o -name '*.hpp' -o -name '*.S' -o -name '*.s' -o -name '*.py' \) -delete; done
+          df -h | tee -a "$GITHUB_WORKSPACE/diag.txt"
           mkdir -p packages/modules/Virtualization/kernel/prebuilts
           cd packages/modules/Virtualization/kernel/prebuilts
           touch dummy_kernel dummy_modules dummy_bootloader dummy_key
