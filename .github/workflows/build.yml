@@ -92,10 +92,10 @@ jobs:
           filegroup { name: "kernel_prebuilts-5.10-x86_64", srcs: ["dummy_kernel"] }
           filegroup { name: "virt_device_prebuilts_kernel_modules_microdroid-5.10-arm64", srcs: ["dummy_modules"] }
           filegroup { name: "virt_device_prebuilts_kernel_modules_microdroid-5.10-x86_64", srcs: ["dummy_modules"] }
-          cc_library_host { name: "libcdisk_spec", srcs: ["stub.c"] }
-          cc_library_host { name: "libcuttlefish_fs", srcs: ["stub.c"] }
-          cc_library_host { name: "libcuttlefish_utils", srcs: ["stub.c"] }
-          cc_library_host { name: "libimage_aggregator", srcs: ["stub.c"] }
+          cc_library { name: "libcdisk_spec", host_supported: true, srcs: ["stub.c"] }
+          cc_library { name: "libcuttlefish_fs", host_supported: true, srcs: ["stub.c"] }
+          cc_library { name: "libcuttlefish_utils", host_supported: true, srcs: ["stub.c"] }
+          cc_library { name: "libimage_aggregator", host_supported: true, srcs: ["stub.c"] }
           EOF
           cd "$GITHUB_WORKSPACE/lineage"
           df -h
