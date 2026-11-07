@@ -83,6 +83,7 @@ jobs:
           exec >> "$GITHUB_WORKSPACE/build.log" 2>&1
           du -sh .repo || true
           rm -rf .repo
+          rm -rf cts test platform_testing developers sdk prebuilts/qemu-kernel tools/test tools/tradefederation
           mkdir -p packages/modules/Virtualization/kernel/prebuilts
           cd packages/modules/Virtualization/kernel/prebuilts
           touch dummy_kernel dummy_modules dummy_bootloader dummy_key
