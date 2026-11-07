@@ -1,26 +1,2 @@
-// Minimal stand-ins for test-only defaults modules whose projects are not
-// synced in this build (cts, test/vts, platform_testing are dropped to fit
-// the 98 GB CI volume). Kept modules that reference them still resolve.
-java_defaults {
-    name: "cts_error_prone_rules",
-}
-
-java_defaults {
-    name: "cts_error_prone_rules_tests",
-}
-
-java_defaults {
-    name: "cts_support_defaults",
-}
-
-java_defaults {
-    name: "cts_defaults",
-}
-
-java_defaults {
-    name: "vts_defaults",
-}
-
-java_defaults {
-    name: "mts_defaults",
-}
+// Placeholder. Test-only defaults modules (cts_defaults, vts_defaults, ...) come
+// from their own projects, which are synced. Kept so the path stays stable.
