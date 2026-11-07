@@ -63,7 +63,7 @@ jobs:
           python3 - <<'PY'
           import xml.etree.ElementTree as ET
           t = ET.parse('/tmp/full.xml'); r = t.getroot()
-          keep = ('device/vivo/PD2048', 'device/lineage', 'device/generic', 'vendor/vivo/PD2048', 'vendor/lineage', 'kernel/configs')
+          keep = ('device/vivo/PD2048', 'device/lineage', 'device/generic', 'device/google/cuttlefish', 'vendor/vivo/PD2048', 'vendor/lineage', 'kernel/configs')
           removed = 0
           for p in list(r.findall('project')):
               path = p.get('path') or p.get('name') or ''
@@ -86,16 +86,11 @@ jobs:
           mkdir -p packages/modules/Virtualization/kernel/prebuilts
           cd packages/modules/Virtualization/kernel/prebuilts
           touch dummy_kernel dummy_modules
-          echo 'int __zcode_stub(void){return 0;}' > stub.c
           cat > Android.bp <<'EOF'
           filegroup { name: "kernel_prebuilts-5.10-arm64", srcs: ["dummy_kernel"] }
           filegroup { name: "kernel_prebuilts-5.10-x86_64", srcs: ["dummy_kernel"] }
           filegroup { name: "virt_device_prebuilts_kernel_modules_microdroid-5.10-arm64", srcs: ["dummy_modules"] }
           filegroup { name: "virt_device_prebuilts_kernel_modules_microdroid-5.10-x86_64", srcs: ["dummy_modules"] }
-          cc_library { name: "libcdisk_spec", host_supported: true, srcs: ["stub.c"] }
-          cc_library { name: "libcuttlefish_fs", host_supported: true, srcs: ["stub.c"] }
-          cc_library { name: "libcuttlefish_utils", host_supported: true, srcs: ["stub.c"] }
-          cc_library { name: "libimage_aggregator", host_supported: true, srcs: ["stub.c"] }
           EOF
           cd "$GITHUB_WORKSPACE/lineage"
           df -h
