@@ -70,8 +70,11 @@ jobs:
               if (path.startswith('device/') or path.startswith('vendor/') or path.startswith('kernel/') or path.startswith('hardware/qcom')) and not any(path == k or path.startswith(k + '/') for k in keep):
                   r.remove(p); removed += 1
           drop = ('cts', 'test', 'platform_testing', 'sdk', 'developers', 'tools/tradefederation', 'tools/test', 'tools/asuite', 'pdk', 'prebuilts/qemu-kernel', 'external/robolectric')
+          test_keep = ('test/app_compat/csuite',)
           for p in list(r.findall('project')):
               path = p.get('path') or p.get('name') or ''
+              if any(path == k or path.startswith(k + '/') for k in test_keep):
+                  continue
               if any(path == d or path.startswith(d + '/') for d in drop):
                   r.remove(p); removed += 1
           t.write('.repo/manifests/default.xml', encoding='utf-8', xml_declaration=True)
@@ -89,7 +92,7 @@ jobs:
           du -sh .repo || true
           { echo "repo size: $(du -sh .repo 2>/dev/null | cut -f1)"; df -h; } | tee "$GITHUB_WORKSPACE/diag.txt"
           rm -rf .repo
-          rm -rf art/test
+          du -sh --exclude=.repo ./* 2>/dev/null | sort -h | tail -25 | tee -a "$GITHUB_WORKSPACE/diag.txt"
           df -h | tee -a "$GITHUB_WORKSPACE/diag.txt"
           mkdir -p packages/modules/Virtualization/kernel/prebuilts
           cd packages/modules/Virtualization/kernel/prebuilts
