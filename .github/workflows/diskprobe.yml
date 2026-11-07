@@ -1,0 +1,53 @@
+name: Disk probe
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  issues: write
+
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Maximize build space
+        uses: easimon/maximize-build-space@master
+        with:
+          root-reserve-mb: 4096
+          swap-size-mb: 4096
+
+      - name: Report disk layout
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          REPO: ${{ github.repository }}
+        run: |
+          {
+            echo "== df -h =="
+            df -h
+            echo
+            echo "== df -h workspace =="
+            df -h "$GITHUB_WORKSPACE"
+            echo
+            echo "== mounts =="
+            mount | grep -E " / | /mnt| /home| /tmp " || true
+            echo
+            echo "== free =="
+            free -h
+            echo
+            echo "== swap =="
+            swapon --show || true
+          } > /tmp/df.txt 2>&1
+          cat /tmp/df.txt
+          python3 - <<'PY'
+          import json, os, urllib.request
+          body = open("/tmp/df.txt", errors="replace").read()
+          req = urllib.request.Request(
+              "https://api.github.com/repos/%s/issues" % os.environ["REPO"],
+              data=json.dumps({"title": "disk probe", "body": "```\n" + body + "\n```"}).encode(),
+              method="POST")
+          req.add_header("Authorization", "Bearer " + os.environ["GH_TOKEN"])
+          req.add_header("Accept", "application/vnd.github+json")
+          req.add_header("User-Agent", "zcode-ci")
+          print(urllib.request.urlopen(req, timeout=60).status)
+          PY
