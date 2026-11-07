@@ -16,7 +16,7 @@ jobs:
         uses: easimon/maximize-build-space@master
         with:
           root-reserve-mb: 4096
-          swap-size-mb: 4096
+          swap-size-mb: 8192
           remove-dotnet: 'true'
           remove-android: 'true'
           remove-haskell: 'true'
@@ -96,7 +96,9 @@ jobs:
           df -h
           source build/envsetup.sh
           lunch lineage_PD2048-userdebug
-          mka systemimage -j$(nproc)
+          free -h
+df -h
+mka systemimage -j2
 
       - name: Upload system image
         if: always()
