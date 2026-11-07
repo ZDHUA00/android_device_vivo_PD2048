@@ -83,6 +83,16 @@ jobs:
           exec >> "$GITHUB_WORKSPACE/build.log" 2>&1
           du -sh .repo || true
           rm -rf .repo
+          mkdir -p packages/modules/Virtualization/kernel/prebuilts
+          cd packages/modules/Virtualization/kernel/prebuilts
+          touch dummy_kernel dummy_modules
+          cat > Android.bp <<'EOF'
+          filegroup { name: "kernel_prebuilts-5.10-arm64", srcs: ["dummy_kernel"] }
+          filegroup { name: "kernel_prebuilts-5.10-x86_64", srcs: ["dummy_kernel"] }
+          filegroup { name: "virt_device_prebuilts_kernel_modules_microdroid-5.10-arm64", srcs: ["dummy_modules"] }
+          filegroup { name: "virt_device_prebuilts_kernel_modules_microdroid-5.10-x86_64", srcs: ["dummy_modules"] }
+          EOF
+          cd "$GITHUB_WORKSPACE/lineage"
           df -h
           source build/envsetup.sh
           lunch lineage_PD2048-userdebug
