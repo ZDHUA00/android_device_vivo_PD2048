@@ -69,7 +69,7 @@ jobs:
               path = p.get('path') or p.get('name') or ''
               if (path.startswith('device/') or path.startswith('vendor/') or path.startswith('kernel/') or path.startswith('hardware/qcom')) and not any(path == k or path.startswith(k + '/') for k in keep):
                   r.remove(p); removed += 1
-          drop = ('prebuilts/abi-dumps', 'prebuilts/android-emulator', 'prebuilts/asuite', 'prebuilts/bazel', 'prebuilts/clang/host/darwin-x86', 'prebuilts/cmdline-tools', 'prebuilts/devtools', 'prebuilts/gcc/linux-x86/host/x86_64-linux-glibc2.17-4.8', 'prebuilts/go/darwin-x86', 'prebuilts/gradle-plugin', 'prebuilts/jdk/jdk8', 'prebuilts/jdk/jdk9', 'prebuilts/qemu-kernel', 'prebuilts/remoteexecution-client')
+          drop = ('prebuilts/abi-dumps', 'prebuilts/clang/host/darwin-x86', 'prebuilts/go/darwin-x86', 'prebuilts/gcc/linux-x86/host/x86_64-linux-glibc2.17-4.8', 'prebuilts/jdk/jdk8', 'prebuilts/jdk/jdk9', 'prebuilts/qemu-kernel')
           for p in list(r.findall('project')):
               path = p.get('path') or p.get('name') or ''
               if any(path == d or path.startswith(d + '/') for d in drop):
