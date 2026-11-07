@@ -91,9 +91,6 @@ jobs:
           rm -rf .repo
           du -sh --exclude=.repo ./* 2>/dev/null | sort -h | tail -25 | tee -a "$GITHUB_WORKSPACE/diag.txt"
           du -sh prebuilts/* 2>/dev/null | sort -h | tail -18 | tee -a "$GITHUB_WORKSPACE/diag.txt"
-          DEF=$(grep -rhoE 'clang-r[0-9a-zA-Z]+' build/soong/cc/config/global.go | head -1)
-          echo "default clang: $DEF" | tee -a "$GITHUB_WORKSPACE/diag.txt"
-          ls -d prebuilts/clang/host/linux-x86/clang-* 2>/dev/null | grep -v -E "(${DEF}|clang-3289846)$" | xargs -r rm -rf
           df -h | tee -a "$GITHUB_WORKSPACE/diag.txt"
           mkdir -p packages/modules/Virtualization/kernel/prebuilts
           cd packages/modules/Virtualization/kernel/prebuilts
