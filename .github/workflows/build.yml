@@ -14,10 +14,20 @@ jobs:
     steps:
       - name: Free disk space (no LVM build volume)
         run: |
-          sudo rm -rf /usr/local/lib/android /usr/share/dotnet /opt/ghc /usr/local/.ghcup \n            /opt/hostedtoolcache /usr/local/lib/node_modules /usr/share/swift /usr/lib/jvm \n            /usr/local/share/chromium /opt/microsoft /usr/local/share/powershell || true
+          sudo rm -rf /usr/local/lib/android /usr/share/dotnet /opt/ghc /usr/local/.ghcup /opt/hostedtoolcache /usr/local/lib/node_modules /usr/share/swift /usr/local/share/chromium /opt/microsoft /usr/local/share/powershell || true
           sudo apt-get clean || true
           df -h / /home/runner/work || true
           findmnt -T /home/runner/work || true
+
+      - name: Enable zram swap (absorb soong analysis spikes)
+        run: |
+          sudo modprobe zram || true
+          echo 24G | sudo tee /sys/block/zram0/disksize || true
+          sudo mkswap /dev/zram0 || true
+          sudo swapon -p 100 /dev/zram0 || true
+          sudo sysctl -w vm.swappiness=100 || true
+          free -h || true
+          swapon --show || true
 
       - name: Install dependencies
         run: |
@@ -126,7 +136,7 @@ jobs:
           done
           MON
           setsid bash "$GITHUB_WORKSPACE/mon.sh" >/dev/null 2>&1 &
-          mka systemimage -j1 2>&1 | tee -a "$GITHUB_WORKSPACE/build.log"
+          mka systemimage -j2 2>&1 | tee -a "$GITHUB_WORKSPACE/build.log"
 
       - name: Upload system image
         if: always()
