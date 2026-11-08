@@ -12,15 +12,12 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 360
     steps:
-      - name: Maximize build space
-        uses: easimon/maximize-build-space@master
-        with:
-          root-reserve-mb: 4096
-          swap-size-mb: 4096
-          remove-dotnet: 'true'
-          remove-android: 'true'
-          remove-haskell: 'true'
-          remove-codeql: 'true'
+      - name: Free disk space (no LVM build volume)
+        run: |
+          sudo rm -rf /usr/local/lib/android /usr/share/dotnet /opt/ghc /usr/local/.ghcup \n            /opt/hostedtoolcache /usr/local/lib/node_modules /usr/share/swift /usr/lib/jvm \n            /usr/local/share/chromium /opt/microsoft /usr/local/share/powershell || true
+          sudo apt-get clean || true
+          df -h / /home/runner/work || true
+          findmnt -T /home/runner/work || true
 
       - name: Install dependencies
         run: |
