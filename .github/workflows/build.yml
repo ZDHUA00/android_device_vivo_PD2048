@@ -2,6 +2,11 @@ name: Build LineageOS 20 for PD2048
 
 on:
   workflow_dispatch:
+    inputs:
+      target:
+        description: make target
+        required: false
+        default: systemimage
 
 permissions:
   contents: read
@@ -151,7 +156,7 @@ jobs:
           done
           MON
           setsid bash "$GITHUB_WORKSPACE/mon.sh" >/dev/null 2>&1 &
-          mka systemimage -j3 2>&1 | tee -a "$GITHUB_WORKSPACE/build.log"
+          mka ${{ inputs.target }} -j3 2>&1 | tee -a "$GITHUB_WORKSPACE/build.log"
 
       - name: Upload system image
         if: always()
