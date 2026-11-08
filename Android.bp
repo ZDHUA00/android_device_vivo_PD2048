@@ -5,3 +5,12 @@
 
 soong_namespace {
 }
+
+// APN list: the AOSP device/sample module is not synced in this build, so ship
+// the vendor list extracted from the stock system image.
+prebuilt_etc {
+    name: "apns-conf.xml",
+    src: "apns-conf.xml",
+    filename: "apns-conf.xml",
+    installable: true,
+}
