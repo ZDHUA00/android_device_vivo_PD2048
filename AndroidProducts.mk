@@ -4,9 +4,12 @@
 #
 
 PRODUCT_MAKEFILES := \
-    $(LOCAL_DIR)/lineage_PD2048.mk
+    $(LOCAL_DIR)/lineage_PD2048.mk \
+    $(LOCAL_DIR)/lineage_PD2048_mini.mk
 
 COMMON_LUNCH_CHOICES := \
     lineage_PD2048-user \
     lineage_PD2048-userdebug \
-    lineage_PD2048-eng
+    lineage_PD2048-eng \
+    lineage_PD2048_mini-userdebug \
+    lineage_PD2048_mini-eng
