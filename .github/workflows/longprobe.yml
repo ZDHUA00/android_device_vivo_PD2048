@@ -1,0 +1,29 @@
+name: Long job probe
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+    steps:
+      - name: Maximize build space
+        uses: easimon/maximize-build-space@master
+        with:
+          root-reserve-mb: 8192
+          swap-size-mb: 8192
+          remove-dotnet: 'true'
+          remove-android: 'true'
+          remove-haskell: 'true'
+
+      - name: Sleep 70 minutes with heartbeat
+        run: |
+          for i in $(seq 1 70); do
+            echo "[hb] $(date -u +%H:%M:%S) minute $i load $(cut -d' ' -f1-3 /proc/loadavg)"
+            sleep 60
+          done
+          echo "SURVIVED 70 MINUTES"
