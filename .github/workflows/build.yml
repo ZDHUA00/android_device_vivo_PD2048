@@ -96,6 +96,7 @@ jobs:
           du -sh .repo || true
           { echo "repo size: $(du -sh .repo 2>/dev/null | cut -f1)"; df -h; } | tee "$GITHUB_WORKSPACE/diag.txt"
           rm -rf .repo
+          find . -type d \( -name vts -o -name vts-testcase \) -prune -exec rm -rf {} + 2>/dev/null || true
           du -sh --exclude=.repo ./* 2>/dev/null | sort -h | tail -25 | tee -a "$GITHUB_WORKSPACE/diag.txt"
           du -sh prebuilts/* 2>/dev/null | sort -h | tail -18 | tee -a "$GITHUB_WORKSPACE/diag.txt"
           df -h | tee -a "$GITHUB_WORKSPACE/diag.txt"
@@ -129,7 +130,7 @@ jobs:
           done
           MON
           setsid bash "$GITHUB_WORKSPACE/mon.sh" >/dev/null 2>&1 &
-          mka systemimage -j1 2>&1 | tee -a "$GITHUB_WORKSPACE/build.log"
+          mka systemimage -j2 2>&1 | tee -a "$GITHUB_WORKSPACE/build.log"
 
       - name: Upload system image
         if: always()
