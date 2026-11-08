@@ -104,6 +104,16 @@ jobs:
           mkdir -p "$GITHUB_WORKSPACE/tmp"
           export TMPDIR="$GITHUB_WORKSPACE/tmp" TMP="$GITHUB_WORKSPACE/tmp" TEMP="$GITHUB_WORKSPACE/tmp"
           du -sh .repo || true
+          if [ -f .repo/manifests/default.xml ]; then cp .repo/manifests/default.xml /tmp/bm.xml; else echo '<manifest/>' > /tmp/bm.xml; fi
+          rm -rf .repo
+          mkdir -p .repo/repo
+          cat > .repo/repo/repo <<'PYSTUB'
+          import sys
+          if "--version" in sys.argv or "version" in sys.argv:
+              print("repo version v2.30 (stub)")
+          else:
+              sys.stdout.write(open("/tmp/bm.xml").read())
+          PYSTUB
           { echo "repo size: $(du -sh .repo 2>/dev/null | cut -f1)"; df -h; } | tee "$GITHUB_WORKSPACE/diag.txt"
           du -sh --exclude=.repo ./* 2>/dev/null | sort -h | tail -25 | tee -a "$GITHUB_WORKSPACE/diag.txt"
           du -sh prebuilts/* 2>/dev/null | sort -h | tail -18 | tee -a "$GITHUB_WORKSPACE/diag.txt"
