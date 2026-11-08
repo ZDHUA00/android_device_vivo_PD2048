@@ -105,7 +105,6 @@ jobs:
           export TMPDIR="$GITHUB_WORKSPACE/tmp" TMP="$GITHUB_WORKSPACE/tmp" TEMP="$GITHUB_WORKSPACE/tmp"
           du -sh .repo || true
           { echo "repo size: $(du -sh .repo 2>/dev/null | cut -f1)"; df -h; } | tee "$GITHUB_WORKSPACE/diag.txt"
-          rm -rf .repo/project-objects
           du -sh --exclude=.repo ./* 2>/dev/null | sort -h | tail -25 | tee -a "$GITHUB_WORKSPACE/diag.txt"
           du -sh prebuilts/* 2>/dev/null | sort -h | tail -18 | tee -a "$GITHUB_WORKSPACE/diag.txt"
           df -h | tee -a "$GITHUB_WORKSPACE/diag.txt"
