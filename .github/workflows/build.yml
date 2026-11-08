@@ -126,7 +126,7 @@ jobs:
           done
           MON
           setsid bash "$GITHUB_WORKSPACE/mon.sh" >/dev/null 2>&1 &
-          mka systemimage -j2 2>&1 | tee -a "$GITHUB_WORKSPACE/build.log"
+          timeout 2400 mka systemimage -j2 2>&1 | tee -a "$GITHUB_WORKSPACE/build.log"
 
       - name: Upload system image
         if: always()
@@ -136,6 +136,8 @@ jobs:
           path: |
             ${{ github.workspace }}/lineage/out/target/product/PD2048/system.img
             ${{ github.workspace }}/lineage/out/target/product/PD2048/*.img
+            ${{ github.workspace }}/build.log
+            ${{ github.workspace }}/diag.txt
           if-no-files-found: warn
 
       - name: Report failure log to issue
