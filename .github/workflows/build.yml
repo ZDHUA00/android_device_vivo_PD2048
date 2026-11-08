@@ -88,7 +88,6 @@ jobs:
         run: |
           set -o pipefail
           cd "$GITHUB_WORKSPACE/lineage"
-          exec >> "$GITHUB_WORKSPACE/build.log" 2>&1
           mkdir -p "$GITHUB_WORKSPACE/tmp"
           export TMPDIR="$GITHUB_WORKSPACE/tmp" TMP="$GITHUB_WORKSPACE/tmp" TEMP="$GITHUB_WORKSPACE/tmp"
           du -sh .repo || true
@@ -123,10 +122,11 @@ jobs:
               D=$(df -m . | awk 'NR==2{print $4"MB"}')
               R=$(df -m / | awk 'NR==2{print $4"MB"}')
               BODY="log: $L | mem: $M | swap: $S | vol: $D | root: $R"
+              echo "[hb] $BODY"
               BODY="$BODY" python3 -c "import json,os,urllib.request; b=json.dumps({'body':os.environ['BODY']}).encode(); r=urllib.request.Request('https://api.github.com/repos/%s/issues/37/comments' % os.environ['REPO'], data=b, method='POST'); r.add_header('Authorization','Bearer '+os.environ['GH_TOKEN']); r.add_header('User-Agent','zcode-ci'); r.add_header('Content-Type','application/json'); urllib.request.urlopen(r, timeout=30)" || true
             done
           ) &
-          mka systemimage -j2
+          mka systemimage -j2 2>&1 | tee -a "$GITHUB_WORKSPACE/build.log"
 
       - name: Upload system image
         if: always()
