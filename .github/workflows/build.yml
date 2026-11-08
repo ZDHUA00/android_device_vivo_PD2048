@@ -132,7 +132,7 @@ jobs:
           cd "$GITHUB_WORKSPACE/lineage"
           df -h
           source build/envsetup.sh
-          lunch lineage_PD2048-eng
+          lunch lineage_PD2048_mini-eng
           free -h
           df -h
           cat > "$GITHUB_WORKSPACE/mon.sh" <<'MON'
