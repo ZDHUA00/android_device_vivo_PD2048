@@ -15,7 +15,7 @@ jobs:
       - name: Maximize build space
         uses: easimon/maximize-build-space@master
         with:
-          root-reserve-mb: 4096
+          root-reserve-mb: 8192
           swap-size-mb: 8192
           remove-dotnet: 'true'
           remove-android: 'true'
@@ -89,6 +89,8 @@ jobs:
           set -o pipefail
           cd "$GITHUB_WORKSPACE/lineage"
           exec >> "$GITHUB_WORKSPACE/build.log" 2>&1
+          mkdir -p "$GITHUB_WORKSPACE/tmp"
+          export TMPDIR="$GITHUB_WORKSPACE/tmp" TMP="$GITHUB_WORKSPACE/tmp" TEMP="$GITHUB_WORKSPACE/tmp"
           du -sh .repo || true
           { echo "repo size: $(du -sh .repo 2>/dev/null | cut -f1)"; df -h; } | tee "$GITHUB_WORKSPACE/diag.txt"
           rm -rf .repo
@@ -114,12 +116,13 @@ jobs:
           df -h
           (
             while true; do
-              sleep 240
-              L=$(tail -n 1 "$GITHUB_WORKSPACE/build.log" 2>/dev/null | cut -c1-150)
+              sleep 120
+              L=$(tail -n 1 "$GITHUB_WORKSPACE/build.log" 2>/dev/null | tr -cd '[:print:]' | cut -c1-120)
               M=$(free -m | awk '/Mem:/{print $3"/"$2"MB"}')
               S=$(free -m | awk '/Swap:/{print $3"MB"}')
-              D=$(df -m . | awk 'NR==2{print $4"MB free"}')
-              BODY="log: $L | mem: $M | swap: $S | disk: $D"
+              D=$(df -m . | awk 'NR==2{print $4"MB"}')
+              R=$(df -m / | awk 'NR==2{print $4"MB"}')
+              BODY="log: $L | mem: $M | swap: $S | vol: $D | root: $R"
               BODY="$BODY" python3 -c "import json,os,urllib.request; b=json.dumps({'body':os.environ['BODY']}).encode(); r=urllib.request.Request('https://api.github.com/repos/%s/issues/37/comments' % os.environ['REPO'], data=b, method='POST'); r.add_header('Authorization','Bearer '+os.environ['GH_TOKEN']); r.add_header('User-Agent','zcode-ci'); r.add_header('Content-Type','application/json'); urllib.request.urlopen(r, timeout=30)" || true
             done
           ) &
