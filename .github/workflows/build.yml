@@ -113,18 +113,19 @@ jobs:
           lunch lineage_PD2048-eng
           free -h
           df -h
-          (
-            while true; do
-              sleep 60
-              L=$(tail -n 1 "$GITHUB_WORKSPACE/build.log" 2>/dev/null | tr -cd '[:print:]' | cut -c1-140)
-              M=$(free -m | awk '/Mem:/{print $3"/"$2}')
-              S=$(free -m | awk '/Swap:/{print $3}')
-              D=$(df -m . | awk 'NR==2{print $4}')
-              R=$(df -m / | awk 'NR==2{print $4}')
-              LA=$(cut -d' ' -f1-3 /proc/loadavg)
-              curl -s -m 10 -d "[$(date -u +%H:%M)] $L | mem $M | swap $S | vol $D | root $R | la $LA" https://ntfy.sh/pd2048zc >/dev/null 2>&1 || true
-            done
-          ) &
+          cat > "$GITHUB_WORKSPACE/mon.sh" <<'MON'
+          while true; do
+            sleep 60
+            L=$(tail -n 1 "$GITHUB_WORKSPACE/build.log" 2>/dev/null | tr -cd '[:print:]' | cut -c1-140)
+            M=$(free -m | awk '/Mem:/{print $3"/"$2}')
+            S=$(free -m | awk '/Swap:/{print $3}')
+            D=$(df -m . | awk 'NR==2{print $4}')
+            R=$(df -m / | awk 'NR==2{print $4}')
+            LA=$(cut -d' ' -f1-3 /proc/loadavg)
+            curl -s -m 10 -d "[$(date -u +%H:%M)] $L | mem $M | swap $S | vol $D | root $R | la $LA" https://ntfy.sh/pd2048zc >/dev/null 2>&1 || true
+          done
+          MON
+          setsid bash "$GITHUB_WORKSPACE/mon.sh" >/dev/null 2>&1 &
           mka systemimage -j2 2>&1 | tee -a "$GITHUB_WORKSPACE/build.log"
 
       - name: Upload system image
