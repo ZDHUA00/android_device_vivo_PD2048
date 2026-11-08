@@ -115,15 +115,14 @@ jobs:
           df -h
           (
             while true; do
-              sleep 120
-              L=$(tail -n 1 "$GITHUB_WORKSPACE/build.log" 2>/dev/null | tr -cd '[:print:]' | cut -c1-120)
-              M=$(free -m | awk '/Mem:/{print $3"/"$2"MB"}')
-              S=$(free -m | awk '/Swap:/{print $3"MB"}')
-              D=$(df -m . | awk 'NR==2{print $4"MB"}')
-              R=$(df -m / | awk 'NR==2{print $4"MB"}')
-              BODY="log: $L | mem: $M | swap: $S | vol: $D | root: $R"
-              echo "[hb] $BODY"
-              BODY="$BODY" python3 -c "import json,os,urllib.request; b=json.dumps({'body':os.environ['BODY']}).encode(); r=urllib.request.Request('https://api.github.com/repos/%s/issues/37/comments' % os.environ['REPO'], data=b, method='POST'); r.add_header('Authorization','Bearer '+os.environ['GH_TOKEN']); r.add_header('User-Agent','zcode-ci'); r.add_header('Content-Type','application/json'); urllib.request.urlopen(r, timeout=30)" || true
+              sleep 60
+              L=$(tail -n 1 "$GITHUB_WORKSPACE/build.log" 2>/dev/null | tr -cd '[:print:]' | cut -c1-140)
+              M=$(free -m | awk '/Mem:/{print $3"/"$2}')
+              S=$(free -m | awk '/Swap:/{print $3}')
+              D=$(df -m . | awk 'NR==2{print $4}')
+              R=$(df -m / | awk 'NR==2{print $4}')
+              LA=$(cut -d' ' -f1-3 /proc/loadavg)
+              curl -s -m 10 -d "[$(date -u +%H:%M)] $L | mem $M | swap $S | vol $D | root $R | la $LA" https://ntfy.sh/pd2048zc >/dev/null 2>&1 || true
             done
           ) &
           mka systemimage -j2 2>&1 | tee -a "$GITHUB_WORKSPACE/build.log"
