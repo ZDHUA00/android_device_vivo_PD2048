@@ -1,2 +1,16 @@
-// Placeholder. Test-only defaults modules (cts_defaults, vts_defaults, ...) come
-// from their own projects, which are synced. Kept so the path stays stable.
+// Placeholder for modules whose projects are not synced in this build
+// (prebuilts/abi-dumps is ~40 GB and only feeds ABI test zips).
+filegroup {
+    name: "vndk_abi_dump_zip",
+    srcs: ["dummy.txt"],
+}
+
+filegroup {
+    name: "platform_abi_dump_zip",
+    srcs: ["dummy.txt"],
+}
+
+filegroup {
+    name: "ndk_abi_dump_zip",
+    srcs: ["dummy.txt"],
+}
