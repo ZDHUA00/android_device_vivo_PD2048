@@ -26,6 +26,9 @@ jobs:
           sudo mkswap /dev/zram0 || true
           sudo swapon -p 100 /dev/zram0 || true
           sudo sysctl -w vm.swappiness=100 || true
+          sudo ln -sf /lib/x86_64-linux-gnu/libncurses.so.6 /usr/lib/x86_64-linux-gnu/libncurses.so.5 || true
+          sudo ln -sf /lib/x86_64-linux-gnu/libtinfo.so.6 /usr/lib/x86_64-linux-gnu/libtinfo.so.5 || true
+          sudo ln -sf /lib/x86_64-linux-gnu/libncursesw.so.6 /usr/lib/x86_64-linux-gnu/libncursesw.so.5 || true
           free -h || true
           swapon --show || true
 
