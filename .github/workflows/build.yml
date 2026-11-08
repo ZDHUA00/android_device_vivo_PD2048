@@ -21,6 +21,9 @@ jobs:
 
       - name: Enable zram swap (absorb soong analysis spikes)
         run: |
+          sudo systemctl stop systemd-oomd systemd-oomd.socket || true
+          sudo systemctl disable systemd-oomd systemd-oomd.socket || true
+          sudo systemctl mask systemd-oomd systemd-oomd.socket || true
           sudo modprobe zram || true
           echo 32G | sudo tee /sys/block/zram0/disksize || true
           sudo mkswap /dev/zram0 || true
