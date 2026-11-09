@@ -174,7 +174,6 @@ pm.dexopt.shared=speed
 qemu.hw.mainkeys=0
 qemu.hw.mainkeys.vivo=0
 ro.actionable_compatible_property.enabled=true
-ro.allow.mock.location=0
 ro.art.hiddenapi.warning=0
 ro.base_build=noah
 ro.board.bbk=MA
