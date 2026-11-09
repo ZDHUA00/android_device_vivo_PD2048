@@ -23,3 +23,6 @@ PRODUCT_GMS_CLIENTID_BASE := android-vivo
 PRODUCT_BUILD_PROP_OVERRIDES += \
     BuildDesc="sys_mssi_64_cn_armv82-user 13 TP1A.220624.014 eng.compil.20250829.200753 release-keys" \
     BuildFingerprint=vivo/PD2048/PD2048:13/TP1A.220624.014/compiler08292002:user/release-keys
+
+# WebView prebuilt lives in Git LFS, not available in this source snapshot.
+PRODUCT_PACKAGES := $(filter-out webview,$(PRODUCT_PACKAGES))
